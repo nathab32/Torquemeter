@@ -1,8 +1,11 @@
 #ifndef BUTTON_H
 #define BUTTON_H
 
-// VARIABLES
+class Button {
+    public:
+        Button(int pin); //Constructor
 
-// FUNCTIONS
+    private:
+};
 
 #endif // BUTTON_H
