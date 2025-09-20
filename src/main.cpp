@@ -22,7 +22,7 @@ enum TorqueUnit
   UNIT_COUNT
 };
 TorqueUnit unit = OZ_IN;
-float torqueFactor;
+float torqueFactor = 2.3;
 int decimals = 1;
 String suffix = "ozin";
 
@@ -39,7 +39,7 @@ void onePressCallback(){
   switch (unit)
   {
   case OZ_IN:
-    torqueFactor = 0.01388738655674625 * 2.3;
+    torqueFactor = 0.01388738 * 2.3;
     decimals = 2;
     suffix = F("ozin");
     break;
@@ -62,7 +62,10 @@ void onePressCallback(){
 }
 
 void twoPressCallback(){
-
+  while (!adc.getDataReady()) delay(10);
+  long adcVal = adc.read();
+  float lpFilter = filter.filt(adcVal);
+  tareReading = avg.update(lpFilter) * 4.5 / pow(2, 24);
 }
 
 void threePressCallback(){
@@ -98,10 +101,6 @@ void displaySetup() {
   display.print(F("by Nathan Chiu"));
   display.setTextColor(SSD1306_WHITE);
   display.display();
-}
-
-int countDigits(int n) {
-
 }
 
 void setup() {
@@ -193,7 +192,7 @@ void loop() {
   }
   
   float voltage = avg.update(lpFilter) * 4.5 / pow(2, 24) - tareReading;
-  float mass = (voltage * .995) * 100/2.7 * 14.25/19.0;
+  float mass = voltage * 54.11255;
 
   button1.handle();
   button2.handle();
