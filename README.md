@@ -32,7 +32,7 @@ Static torquemeter designed for rubber powered flying devices (planes, helicopte
 
 I haven't made the PCB yet, but once that is done, I will upload the full KiCAD files to the repository.
 
-![Schematic image](https://raw.githubusercontent.com/nathab32/Torquemeter/refs/heads/main/images/image.png)
+![Schematic image](https://raw.githubusercontent.com/nathab32/Torquemeter/refs/heads/main/images/schematic.png)
 
 ## 3D Prints
 
@@ -71,6 +71,6 @@ The three buttons' functionality is summarized below. The pin, debounce time, an
 
 | Button | Pin | Press        | Hold                |
 |--------|-----|--------------|---------------------|
-| 1      | 2   | switch units | ?                   |
+| 1      | 2   | switch units | N/A                 |
 | 2      | 4   | tare         | switch debug on/off |
-| 3      | 7   | start timer  | ?                   |
+| 3      | 7   | start timer  | N/A                 |
