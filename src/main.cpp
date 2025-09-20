@@ -26,6 +26,9 @@ float torqueFactor = 2.3;
 int decimals = 1;
 String suffix = "ozin";
 
+bool timerOn = false;
+unsigned long startTime;
+
 const int avgLength = 10;
 LowPass<2> filter(1.0, 9.3, true);
 MovingAverage<uint_fast32_t> avg(avgLength);
@@ -69,7 +72,8 @@ void twoPressCallback(){
 }
 
 void threePressCallback(){
-
+  timerOn = !timerOn;
+  startTime = millis();
 }
 
 void oneHoldCallback(){
@@ -208,13 +212,16 @@ void loop() {
 
   float torque = mass * torqueFactor; //torque in gfcm
   
-
-  
   display.print(F("Torque: "));
   display.print(torque, decimals);
   // int x = 128 - 5 * (suffix.length()+1);
   // display.setCursor(x, 32);
   display.println(" " + suffix);
+
+  display.print(F("Timer: "));
+  if (timerOn) display.print((millis() - startTime) / 1000.0, 2);
+  else display.print(F("0.00"));
+  display.println(F("s"));
   display.display();
   
 }
