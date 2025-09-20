@@ -5,6 +5,11 @@
 #include <MovingAverage.h>
 #include "LowPass2.0.h"
 
+// user-defined variables
+bool debug = false;
+float calValue = 54.11255;
+float armLengthCM = 2.3;
+
 // variables
 Adafruit_SSD1306 display(128, 64, &Wire, -1);
 NAU7802 adc;
@@ -22,12 +27,14 @@ enum TorqueUnit
   UNIT_COUNT
 };
 TorqueUnit unit = OZ_IN;
-float torqueFactor = 2.3;
+float torqueFactor = armLengthCM;
 int decimals = 1;
 String suffix = "ozin";
 
 bool timerOn = false;
 unsigned long startTime;
+
+bool calMode = false;
 
 const int avgLength = 10;
 LowPass<2> filter(1.0, 9.3, true);
@@ -42,22 +49,22 @@ void onePressCallback(){
   switch (unit)
   {
   case OZ_IN:
-    torqueFactor = 0.01388738 * 2.3;
+    torqueFactor = 0.01388738 * armLengthCM;
     decimals = 2;
     suffix = F("ozin");
     break;
   case GF_CM:
-    torqueFactor = 2.3;
+    torqueFactor = armLengthCM;
     decimals = 2;
     suffix = F("gfcm");
     break;
   case IN_LB:
-    torqueFactor = 0.0008679617 * 2.3;
+    torqueFactor = 0.0008679617 * armLengthCM;
     decimals = 5;
     suffix = F("inlb");
     break;
   case MN_M:
-    torqueFactor = 0.0980665 * 2.3;
+    torqueFactor = 0.0980665 * armLengthCM;
     decimals = 3;
     suffix = F("mNm");
     break;
@@ -81,7 +88,7 @@ void oneHoldCallback(){
 }
 
 void twoHoldCallback(){
-
+  calMode = !calMode;
 }
 
 void threeHoldCallback(){
@@ -105,6 +112,13 @@ void displaySetup() {
   display.print(F("by Nathan Chiu"));
   display.setTextColor(SSD1306_WHITE);
   display.display();
+}
+
+bool calibration() {
+  display.clearDisplay();
+  display.println(F("Place calibration platform on load cell"));
+  display.display();
+  return true;
 }
 
 void setup() {
@@ -158,6 +172,8 @@ void setup() {
 
 void loop() {
     // put your main code here, to run repeatedly:
+  if (calMode) calibration();
+
   while (!adc.getDataReady()) delay(10);
   long adcVal = adc.read();
   float lpFilter = filter.filt(adcVal);
@@ -196,7 +212,8 @@ void loop() {
   }
   
   float voltage = avg.update(lpFilter) * 4.5 / pow(2, 24) - tareReading;
-  float mass = voltage * 54.11255;
+  float mass = voltage * calValue;
+  bool overload = mass > 105;
 
   button1.handle();
   button2.handle();
@@ -205,23 +222,44 @@ void loop() {
   display.clearDisplay();
   display.setCursor(0, 0);
   display.setTextSize(1);
-  display.println(F("Voltage: "));
-  display.println(voltage+tareReading, 3);
-  display.println(F("Mass: "));
-  display.println(mass, 2);
 
-  float torque = mass * torqueFactor; //torque in gfcm
+  float torque = mass * torqueFactor;
+  if (debug)
+  {  
+    display.println(F("Voltage: "));
+    display.println(voltage+tareReading, 3);
+
+    display.println(F("Mass: "));
+    display.println(mass, 2);
+
+    display.print(F("Torque: "));
+    if (overload) display.println("OVERLOAD\n");
+    else {
+      display.println(torque, decimals);
+      display.println(" " + suffix);
+    }
+
+    display.print(F("Timer: "));
+    if (timerOn) display.print((millis() - startTime) / 1000.0, 2);
+    else display.print(F("0.00"));
+    display.println(F("s"));
+  }
+  else
+  {
+    display.setTextSize(2);
+    display.println(F("Torque: "));
+    if (overload) display.println("OVERLOAD\n");
+    else {
+      display.println(torque, decimals);
+      display.println(suffix);
+    }
+
+    if (timerOn) display.print((millis() - startTime) / 1000.0, 2);
+    else display.print(F("0.00"));
+    display.println(F("s"));
+  }
   
-  display.print(F("Torque: "));
-  display.print(torque, decimals);
-  // int x = 128 - 5 * (suffix.length()+1);
-  // display.setCursor(x, 32);
-  display.println(" " + suffix);
-
-  display.print(F("Timer: "));
-  if (timerOn) display.print((millis() - startTime) / 1000.0, 2);
-  else display.print(F("0.00"));
-  display.println(F("s"));
+  
   display.display();
   
 }
