@@ -7,7 +7,7 @@
 
 // user-defined variables
 bool debug = true;
-float calValue = 54.11255;
+float calValue = 54.2;
 float armLengthCM = 2.3; //stock arm is 2.3cm
 float overloadVoltage = 2.15; //use debug to find
 
@@ -219,8 +219,14 @@ void loop() {
   float torque = mass * torqueFactor;
   if (debug)
   {  
-    display.print(F("Voltage: "));
+    display.print(F("Raw Voltage: "));
     display.println(voltage+tareReading, 3);
+
+    display.print(F("Tared voltage: "));
+    display.println(voltage, 3);
+
+    display.print(F("calValue: "));
+    display.println(100 / voltage, 3);
 
     display.print(F("Mass: "));
     display.println(mass, 2);
