@@ -6,9 +6,10 @@
 #include "LowPass2.0.h"
 
 // user-defined variables
-bool debug = false;
+bool debug = true;
 float calValue = 54.11255;
-float armLengthCM = 2.3;
+float armLengthCM = 2.3; //stock arm is 2.3cm
+float overloadVoltage = 2.15; //use debug to find
 
 // variables
 Adafruit_SSD1306 display(128, 64, &Wire, -1);
@@ -68,6 +69,8 @@ void onePressCallback(){
     decimals = 3;
     suffix = F("mNm");
     break;
+  case UNIT_COUNT:
+    break;
   }
 }
 
@@ -88,7 +91,7 @@ void oneHoldCallback(){
 }
 
 void twoHoldCallback(){
-  calMode = !calMode;
+  debug = !debug;
 }
 
 void threeHoldCallback(){
@@ -114,15 +117,7 @@ void displaySetup() {
   display.display();
 }
 
-bool calibration() {
-  display.clearDisplay();
-  display.println(F("Place calibration platform on load cell"));
-  display.display();
-  return true;
-}
-
 void setup() {
-  // put your setup code here, to run once:
   Serial.begin(115200);
   Serial.println(F("Serial started"));
   displaySetup();
@@ -171,9 +166,6 @@ void setup() {
 
 
 void loop() {
-    // put your main code here, to run repeatedly:
-  if (calMode) calibration();
-
   while (!adc.getDataReady()) delay(10);
   long adcVal = adc.read();
   float lpFilter = filter.filt(adcVal);
@@ -212,8 +204,9 @@ void loop() {
   }
   
   float voltage = avg.update(lpFilter) * 4.5 / pow(2, 24) - tareReading;
+  bool overload = (voltage + tareReading) > overloadVoltage;
   float mass = voltage * calValue;
-  bool overload = mass > 105;
+  
 
   button1.handle();
   button2.handle();
@@ -226,16 +219,16 @@ void loop() {
   float torque = mass * torqueFactor;
   if (debug)
   {  
-    display.println(F("Voltage: "));
+    display.print(F("Voltage: "));
     display.println(voltage+tareReading, 3);
 
-    display.println(F("Mass: "));
+    display.print(F("Mass: "));
     display.println(mass, 2);
 
     display.print(F("Torque: "));
-    if (overload) display.println("OVERLOAD\n");
+    if (overload) display.println("OVERLOAD");
     else {
-      display.println(torque, decimals);
+      display.print(torque, decimals);
       display.println(" " + suffix);
     }
 
