@@ -15,9 +15,9 @@ float overloadVoltage = 2.15; //use debug to find
 Adafruit_SSD1306 display(128, 64, &Wire, -1);
 NAU7802 adc;
 
-Button button1(2, 50, 2000);// button 1 switches units
-Button button2(4, 50, 2000);// button 2 zeroes the scale and calibrates on hold
-Button button3(7, 50, 2000);// button 3 turns on a timer and enables serial output on hold
+Button button1(2, 50, 1500);// button 1 switches units
+Button button2(4, 50, 1500);// button 2 zeroes the scale and calibrates on hold
+Button button3(7, 50, 1500);// button 3 turns on a timer and enables serial output on hold
 
 enum TorqueUnit
 {
