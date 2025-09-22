@@ -7,7 +7,7 @@
 
 // user-defined variables
 bool debug = true;
-float calValue = 54.2;
+float calValue = 54.4;
 float armLengthCM = 2.3; //stock arm is 2.3cm
 float overloadVoltage = 2.15; //use debug to find
 
@@ -17,7 +17,7 @@ NAU7802 adc;
 
 Button button1(2, 50, 2000);// button 1 switches units
 Button button2(4, 50, 2000);// button 2 zeroes the scale and calibrates on hold
-Button button3(7, 50, 2000);// button 3 turns on a timer and enables logging on hold
+Button button3(7, 50, 2000);// button 3 turns on a timer and enables serial output on hold
 
 enum TorqueUnit
 {
@@ -35,7 +35,7 @@ String suffix = "ozin";
 bool timerOn = false;
 unsigned long startTime;
 
-bool calMode = false;
+bool serialOn = false;
 
 const int avgLength = 10;
 LowPass<2> filter(1.0, 9.3, true);
@@ -95,7 +95,18 @@ void twoHoldCallback(){
 }
 
 void threeHoldCallback(){
+  serialOn = !serialOn;
 
+  display.clearDisplay();
+  display.setCursor(0, 0);
+  display.setTextSize(2);
+  if (serialOn) {
+    display.println(F("Serial On"));
+  } else {
+    display.println(F("Serial Off"));
+  }
+  display.display();
+  delay(1000);
 }
 
 
@@ -109,6 +120,7 @@ void displaySetup() {
   display.fillScreen(SSD1306_WHITE);
   display.setTextColor(SSD1306_BLACK);
   display.setTextSize(1);
+  display.setTextWrap(true);
   display.setCursor(31, 24);
   display.print(F("Torquemeter"));
   display.setCursor(24, 32);
@@ -217,6 +229,7 @@ void loop() {
   display.setTextSize(1);
 
   float torque = mass * torqueFactor;
+  //print to screen
   if (debug)
   {  
     display.print(F("Raw Voltage: "));
@@ -232,33 +245,51 @@ void loop() {
     display.println(mass, 2);
 
     display.print(F("Torque: "));
-    if (overload) display.println("OVERLOAD");
+    if (overload) display.println(F("OVERLOAD"));
     else {
       display.print(torque, decimals);
       display.println(" " + suffix);
     }
 
     display.print(F("Timer: "));
-    if (timerOn) display.print((millis() - startTime) / 1000.0, 2);
-    else display.print(F("0.00"));
-    display.println(F("s"));
+    
   }
   else
   {
     display.setTextSize(2);
     display.println(F("Torque: "));
-    if (overload) display.println("OVERLOAD\n");
+    if (overload) display.println(F("OVERLOAD\n"));
     else {
       display.println(torque, decimals);
       display.println(suffix);
     }
-
-    if (timerOn) display.print((millis() - startTime) / 1000.0, 2);
-    else display.print(F("0.00"));
-    display.println(F("s"));
   }
-  
-  
+
+  if (timerOn) display.print((millis() - startTime) / 1000.0, 2);
+  else display.print(F("0.00"));
+  display.println(F("s"));
   display.display();
+
+  //print to serial
+  if (serialOn) {
+    Serial.print(F("<"));
+
+    //time
+    Serial.print(millis());
+    Serial.print(F(","));
+
+    //stopwatch time
+    if (timerOn) Serial.print((millis() - startTime));
+    else Serial.print(F("0"));
+    Serial.print(F(","));
+
+    //torque
+    Serial.print(torque, decimals);
+    Serial.print(F(","));
+
+    //units
+    Serial.print(suffix);
+    Serial.println(F(">"));
+  }
   
 }
