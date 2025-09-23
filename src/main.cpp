@@ -28,14 +28,14 @@ enum TorqueUnit
   UNIT_COUNT
 };
 TorqueUnit unit = OZ_IN;
-float torqueFactor = armLengthCM;
+float torqueFactor = 0.01388738 * armLengthCM;
 int decimals = 1;
 String suffix = "ozin";
 
 bool timerOn = false;
 unsigned long startTime;
 
-bool serialOn = false;
+bool serialOn = true;
 
 const int avgLength = 10;
 LowPass<2> filter(1.0, 9.3, true);
@@ -104,6 +104,7 @@ void threeHoldCallback(){
     display.println(F("Serial On"));
   } else {
     display.println(F("Serial Off"));
+    Serial.println(F("exit"));
   }
   display.display();
   delay(1000);
