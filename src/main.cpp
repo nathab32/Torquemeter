@@ -10,6 +10,7 @@ bool debug = true;
 float calValue = 54.4;
 float armLengthCM = 2.3; //stock arm is 2.3cm
 float overloadVoltage = 2.15; //use debug to find
+int serialSpeed = 9600;
 
 // variables
 Adafruit_SSD1306 display(128, 64, &Wire, -1);
@@ -29,7 +30,7 @@ enum TorqueUnit
 };
 TorqueUnit unit = OZ_IN;
 float torqueFactor = 0.01388738 * armLengthCM;
-int decimals = 1;
+int decimals = 2;
 String suffix = "ozin";
 
 bool timerOn = false;
@@ -131,7 +132,7 @@ void displaySetup() {
 }
 
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(serialSpeed);
   Serial.println(F("Serial started"));
   displaySetup();
 
