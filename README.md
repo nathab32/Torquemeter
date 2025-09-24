@@ -74,3 +74,19 @@ The three buttons' functionality is summarized below. The pin, debounce time, an
 | 1      | 2   | switch units | N/A                 |
 | 2      | 4   | tare         | switch debug on/off |
 | 3      | 7   | start timer  | N/A                 |
+
+## Data Logging
+
+Inside of the `data` folder, you'll find a python file that enables logging of the data using the serial port. However, before this is possible, the serial port and baud rate may need to be changed.
+
+- Change `PORT` to the port you uploaded the Torquemeter program to. It may be helpful to look in the device manager, or run `pio device list` in the PlatformIO CLI.
+- `BAUD` should be changed to whatever serial speed you're running at. The default speed set in `main.cpp` is 9600.
+
+After those values have been changed, you may proceed with data logging.
+
+1. Plug the torquemeter into your computer's USB port, and ensure the serial port in the python file matches the Arduino's serial port.
+2. Run the python file. The Torquemeter's serial output should be printed in the command prompt.
+3. Collect your data. The timer time is also recorded if necessary. The current unit displayed on the torquemeter is not important; at the end of logging, all units will be recorded.
+4. End data collection and save the data by holding button 3 of the torquemeter until the screen flashes with the text "Serial off". The data will be saved inside of the data folder with a time stamp of when the data was recorded.
+
+To collect data again, rerun the python file. Keep in mind this resets the Torquemeter, so any tare or timer that is going on will be reset. To cancel collection and prevent data from being saved, do `Ctrl+C` when inside of the command line used to run the python file.
